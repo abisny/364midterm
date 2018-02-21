@@ -61,6 +61,15 @@ class NameForm(FlaskForm):
 ###### VIEW FXNS ######
 #######################
 
+## Error handling routes
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
+
 @app.route('/')
 def home():
     form = NameForm() # User should be able to enter name after name and each one will be saved, even if it's a duplicate! Sends data with GET

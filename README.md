@@ -52,7 +52,7 @@ Reading code you have been given already, written already, and looking at exampl
 
 I recommend writing an outline of your documentation first, and then writing a lot of comments in your `SI364midterm.py` file to subsequently translate into code.
 
-Design will not earn you points for this assignment thoug you may certainly include it if you want -- do not prioritize it over the functionality, which is what this midterm assignment is about.
+Design will not earn you points for this assignment though you may certainly include it if you want -- do not prioritize it over the functionality, which is what this midterm assignment is about.
 
 ### Requirements to complete for 1800 points (90%) -- an awesome, solid app
 
