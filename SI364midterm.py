@@ -30,7 +30,12 @@ db = SQLAlchemy(app)
 ######################################
 ######## HELPER FXNS (If any) ########
 ######################################
-def get_or_create_movie(title, release_year):
+
+# REQUIRES: title is a string, release_year is an int
+# MODIFIES: db tables movies, years
+# EFFECTS: adds release_year to Years if not there, adds movie to Movies if
+#          not there (with foreign key release_year)
+def get_or_create(title, release_year):
     if not Year.query.filter_by(name=release_year).first():
         db.session.add(Year(name=release_year))
     if Movie.query.filter_by(title=title, release_year=release_year).first():
@@ -117,7 +122,7 @@ def movies():
     if form.validate_on_submit():
         ia = IMDb()
         first_result = ia.search_movie(form.title.data)[0]
-        movie = get_or_create_movie(title=first_result['title'], release_year=first_result['year'])
+        movie = get_or_create(title=first_result['title'], release_year=first_result['year'])
         return redirect(url_for('all_movies'))
     return render_template('movie_form.html', form=form)
 
