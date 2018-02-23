@@ -115,7 +115,6 @@ def movies():
         movie = get_or_create_movie(title=form.title.data, release_year=release_year)
         db.session.add(movie)
         db.session.commit()
-        movies = Movie.query.all()
         return redirect(url_for('all_movies'))
     return render_template('movie_form.html', form=form)
 
