@@ -1,6 +1,8 @@
 {% block movieform %}
 
-<form action="{{ url_for('movies') }}" method='GET'>
+<h4>Movie Form</h4>
+
+<form action="{{ url_for('movies') }}" method='POST'>
   {{ form.title.label() }}{{ form.title() }}
   {{ form.submit() }}
   {{ form.hidden_tag() }}

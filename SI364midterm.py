@@ -30,8 +30,15 @@ db = SQLAlchemy(app)
 ######################################
 ######## HELPER FXNS (If any) ########
 ######################################
-
-
+def get_or_create_movie(title, release_year):
+    if not Year.query.filter_by(name=release_year).first():
+        db.session.add(Year(name=release_year))
+    if Movie.query.filter_by(title=title, release_year=release_year).first():
+        return Movie.query.filter_by(title=title, release_year=release_year).first()
+    movie = Movie(title=title, release_year=release_year)
+    db.session.add(movie)
+    db.session.commit()
+    return movie
 
 
 ##################
@@ -49,16 +56,15 @@ class Movie(db.Model):
     __tablename__ = "movies"
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(64))
-    release_year = db.Column(db.Integer)
-    genre = db.Column(db.String(64), db.ForeignKey('genres.name'))
+    release_year = db.Column(db.Integer, db.ForeignKey('years.name'))
     def __repr__(self):
         return "{}, {} (ID: {})".format(self.title, self.release_year, self.id)
 
-class Genre(db.Model):
-    __tablename__ = "genres"
+class Year(db.Model):
+    __tablename__ = "years"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    movies = db.relationship('Movie', backref='movie')
+    name = db.Column(db.Integer, unique=True)
+    movies = db.relationship('Movie', backref='Genre')
     def __repr__(self):
         return "{} (ID: {})".format(self.name, self.id)
 
@@ -100,7 +106,7 @@ def home():
         return redirect(url_for('all_names'))
     return render_template('base.html', form=form)
 
-@app.route('/names')
+@app.route('/all_names')
 def all_names():
     names = Name.query.all()
     return render_template('name_example.html',names=names)
@@ -111,10 +117,7 @@ def movies():
     if form.validate_on_submit():
         ia = IMDb()
         first_result = ia.search_movie(form.title.data)[0]
-        release_year = first_result['long imdb canonical title'].split('(')[1].split(')')[0]
-        movie = get_or_create_movie(title=form.title.data, release_year=release_year)
-        db.session.add(movie)
-        db.session.commit()
+        movie = get_or_create_movie(title=first_result['title'], release_year=first_result['year'])
         return redirect(url_for('all_movies'))
     return render_template('movie_form.html', form=form)
 

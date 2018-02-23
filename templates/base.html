@@ -2,6 +2,7 @@
 
 {% if form %}
   {% if form.name %}
+    <h4>Name Form</h4>
     <form action="{{ url_for('home') }}" method="POST">
         {{ form.name.label() }}{{ form.name() }}<br>
         {{ form.submit() }}
@@ -13,12 +14,15 @@
 {% endblock %}
 
 
-{% block head %}
+{% block index %}
 
+<hr>
+<h4>Index</h4>
 <ul>
   <li><a href='/'>Home</a></li>
-  <li><a href='/names'>Names</a></li>
-  <li><a href='/movies'>Movies</a></li>
+  <li><a href='/all_names'>Names</a></li>
+  <li><a href='/movies'>Add a Movie</a></li>
+  <li><a href='/all_movies'>Movies</a></li>
 </ul>
 
 {% endblock %}
