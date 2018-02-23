@@ -19,7 +19,7 @@ app.use_reloader = True
 
 ## All app.config values
 app.config['SECRET_KEY'] = 'secretstring364midterm'
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://AbbySnyder@localhost/abisnyMidterm"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://AbbySnyder@localhost/abisny364midterm"
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -87,19 +87,18 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'), 500
-##
+########################
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
     form = NameForm() # User should be able to enter name after name and each one will be saved, even if it's a duplicate! Sends data with GET
     if form.validate_on_submit():
-        print ('validated')
         name = form.name.data
         newname = Name(name=name)
         db.session.add(newname)
         db.session.commit()
         return redirect(url_for('all_names'))
-    return render_template('base.html',form=form)
+    return render_template('base.html', form=form)
 
 @app.route('/names')
 def all_names():

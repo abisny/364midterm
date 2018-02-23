@@ -1,3 +1,18 @@
+{% block nameform %}
+
+{% if form %}
+  {% if form.name %}
+    <form action="{{ url_for('home') }}" method="POST">
+        {{ form.name.label() }}{{ form.name() }}<br>
+        {{ form.submit() }}
+        {{ form.hidden_tag() }}
+    </form>
+  {% endif %}
+{% endif %}
+
+{% endblock %}
+
+
 {% block head %}
 
 <ul>
@@ -7,17 +22,3 @@
 </ul>
 
 {% endblock %}
-
-{% block nameform %}
-{% if form.name %}
-  <form action="{{ url_for('home') }}" method="POST">
-      {{ form.name.label() }}{{ form.name() }}<br>
-      {{ form.submit() }}
-      {{ form.hidden_tag() }}
-  </form>
-{% endif %}
-{% endblock %}
-
-{% block movieform %} {% endblock %}
-
-{% block content %} {% endblock %}

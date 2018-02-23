@@ -1,7 +1,5 @@
-{% extends 'base.html' %}
-
 {% block content %}
-<h1> Movies Searched For </h1>
+<h1>Movies Searched For</h1>
 <ol>
   {% for movie in movies %}
     <li>{{ movie.title }}</li>
@@ -9,3 +7,5 @@
 </ol>
 
 {% endblock %}
+
+{% extends 'base.html' %}
