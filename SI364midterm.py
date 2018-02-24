@@ -144,12 +144,11 @@ def play_game():
         top_250 = []
         for item in top_250_raw:
             top_250.append(str(item))
-        result = False
+        index = None
         for i in range(0, 250):
             if form.movie.data == top_250[i]:
-                result = True
                 index = i + 1
-        return render_template('game_result.html', result=result, rank=index)
+        return render_template('game_result.html', rank=index)
     return render_template('game.html', form=form)
 
 ## Code to run the application...
