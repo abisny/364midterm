@@ -1,0 +1,17 @@
+{% block content %}
+
+{% if result %}
+  <h2><b>Great job!</b></h2>
+  <h4><p>You guessed movie number {{ rank }} on IMDb's top 250 list</p></h4>
+{% endif %}
+
+{% if not result %}
+  <h2><b>Sorry :(</b></h2>
+  <h5><p>Your guess was not in IMDb's top 250!</p></h5>
+{% endif %}
+
+<p>Click <a href='/play_game'>here</a> to guess again!</p>
+
+{% endblock %}
+
+{% extends 'base.html' %}

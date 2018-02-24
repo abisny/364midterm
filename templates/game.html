@@ -1,0 +1,14 @@
+{% block gameform %}
+
+<h4>Play the game!</h4>
+<p>Enter a movie title you think would be in IMDb's top 250...</p>
+<p>See if you can guess all 250 :)</p>
+<form action="{{ url_for('play_game') }}" method='POST'>
+  {{ form.movie.label() }}{{ form.movie() }}
+  {{ form.submit() }}
+  {{ form.hidden_tag() }}
+</form>
+
+{% endblock %}
+
+{% extends 'base.html' %}

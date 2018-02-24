@@ -85,6 +85,9 @@ class MovieForm(FlaskForm):
     title = StringField("Please enter the title of a movie.", validators=[Required()])
     submit = SubmitField()
 
+class GameForm(FlaskForm):
+    movie = StringField("Guess a top 250 movie title here.", validators=[Required()])
+    submit = SubmitField()
 
 #######################
 ###### VIEW FXNS ######
@@ -122,7 +125,8 @@ def movies():
     if form.validate_on_submit():
         ia = IMDb()
         first_result = ia.search_movie(form.title.data)[0]
-        movie = get_or_create(title=first_result['title'], release_year=first_result['year'])
+        # get/create Year and associated Movie
+        get_or_create(title=first_result['title'], release_year=first_result['year'])
         return redirect(url_for('all_movies'))
     return render_template('movie_form.html', form=form)
 
@@ -130,6 +134,23 @@ def movies():
 def all_movies():
     movies = Movie.query.all()
     return render_template('all_movies.html', movies=movies)
+
+@app.route('/play_game', methods=['GET', 'POST'])
+def play_game():
+    form = GameForm()
+    if form.validate_on_submit():
+        ia = IMDb()
+        top_250_raw = ia.get_top250_movies()
+        top_250 = []
+        for item in top_250_raw:
+            top_250.append(str(item))
+        result = False
+        for i in range(0, 250):
+            if form.movie.data == top_250[i]:
+                result = True
+                index = i + 1
+        return render_template('game_result.html', result=result, rank=index)
+    return render_template('game.html', form=form)
 
 ## Code to run the application...
 if __name__ == '__main__':
