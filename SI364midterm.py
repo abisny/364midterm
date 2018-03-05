@@ -7,7 +7,7 @@
 import os
 from flask import Flask, render_template, session, redirect, url_for, flash, request
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField # Note that you may need to import more here! Check out examples that do what you want to figure out what.
+from wtforms import StringField, SubmitField, RadioField # Note that you may need to import more here! Check out examples that do what you want to figure out what.
 from wtforms.validators import Required # Here, too
 from flask_sqlalchemy import SQLAlchemy
 from imdb import IMDb # pip install imdbpy
@@ -56,6 +56,9 @@ class Name(db.Model):
     name = db.Column(db.String(64))
     def __repr__(self):
         return "{} (ID: {})".format(self.name, self.id)
+    def validate_name(self, field):
+        if len(str(field.data).split()) < 2:
+            raise ValidationError("Name must be at least two words")
 
 class Movie(db.Model):
     __tablename__ = "movies"
@@ -73,12 +76,20 @@ class Year(db.Model):
     def __repr__(self):
         return "{} (ID: {})".format(self.name, self.id)
 
+class Game(db.Model):
+    __tablename__ = "games"
+    id = db.Column(db.Integer, primary_key=True)
+    player = db.Column(db.String(64))
+    current_score = db.Column(db.String(64))
+    def __repr__(self):
+        return "Current score for {} (game #{}) is {}! Great job!".format(self.name, self.id, self.current_score)
+
 ###################
 ###### FORMS ######
 ###################
 
 class NameForm(FlaskForm):
-    name = StringField("Please enter your name.",validators=[Required()])
+    name = StringField("Please enter your full name.",validators=[Required()])
     submit = SubmitField()
 
 class MovieForm(FlaskForm):
@@ -86,6 +97,9 @@ class MovieForm(FlaskForm):
     submit = SubmitField()
 
 class GameForm(FlaskForm):
+    game = RadioField(choices=[(1, "Start a new game."), (2, "Continue previous game.")], validators=[Required()])
+    game_id = StringField("Enter the ID number for the game you want to continue.")
+    player = StringField("Enter your name.")
     movie = StringField("Guess a top 250 movie title here.", validators=[Required()])
     submit = SubmitField()
 

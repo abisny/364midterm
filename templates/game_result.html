@@ -1,11 +1,11 @@
 {% block content %}
 
-{% if index %}
+{% if rank %}
   <h2><b>Great job!</b></h2>
   <h4><p>You guessed movie number {{ rank }} on IMDb's top 250 list</p></h4>
 {% endif %}
 
-{% if not index %}
+{% if not rank %}
   <h2><b>Sorry :(</b></h2>
   <h5><p>Your guess was not in IMDb's top 250!</p></h5>
 {% endif %}
