@@ -104,11 +104,8 @@ class Game(db.Model):
 ###################
 
 class NameForm(FlaskForm):
-    name = StringField("Please enter your full name.",validators=[Required()])
+    name = StringField("Please enter your name.",validators=[Required()])
     submit = SubmitField()
-    def validate_name(self, field):
-        if len(str(field.data).split()) < 2:
-            raise ValidationError("Name must be at least two words")
 
 class MovieForm(FlaskForm):
     title = StringField("Search for a movie by title.", validators=[Required()])
