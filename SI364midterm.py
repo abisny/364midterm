@@ -124,16 +124,7 @@ class GameForm(FlaskForm):
 ###### VIEW FXNS ######
 #######################
 
-## Error handling routes ##
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template('500.html'), 500
-###########################
-
+########### Provided routes (NameForm and home) ############
 @app.route('/', methods=['GET', 'POST'])
 def home():
     form = NameForm() # User should be able to enter name after name and each one will be saved, even if it's a duplicate! Sends data with GET
@@ -144,11 +135,20 @@ def home():
         db.session.commit()
         return redirect(url_for('all_names'))
     return render_template('base.html', form=form)
-
 @app.route('/all_names')
 def all_names():
-    names = Name.query.all()
-    return render_template('name_example.html',names=names)
+    return render_template('name_example.html', names=Name.query.all())
+############################################################
+
+## Error handling routes ##
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
+###########################
 
 @app.route('/movies', methods=['GET', 'POST'])
 def movies():
@@ -162,8 +162,7 @@ def movies():
 
 @app.route('/all_movies')
 def all_movies():
-    movies = Movie.query.all()
-    return render_template('all_movies.html', movies=movies)
+    return render_template('all_movies.html', movies=Movie.query.all())
 
 @app.route('/play_game', methods=['GET', 'POST'])
 def play_game():
@@ -186,8 +185,7 @@ def play_game():
 
 @app.route('/scores')
 def view_scores():
-    games = Game.query.all()
-    return render_template('scores.html', games=games)
+    return render_template('scores.html', games=Game.query.all())
 
 ## Code to run the application...
 if __name__ == '__main__':
