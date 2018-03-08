@@ -51,14 +51,17 @@ def increment_score(game_id, guess):
     if guess not in game.guesses.split(';'):
         game.current_score+=1
         game.guesses += (';' + guess)
+        return True
+    return False
 
 # REQUIRES: player and guess are strings, correct either an integer or None
 # MODIFIES: db table games
 # EFFECTS: adds a new game to the db table games with given player name;
 #          increments score if correct guess
 def create_game(player, correct, guess):
-    game = Game(player=player, current_score=0)
+    game = Game(player=player, current_score=0, guesses='')
     db.session.add(game)
+    db.session.commit()
     if correct: increment_score(game.id, guess)
     return game
 
@@ -97,7 +100,7 @@ class Game(db.Model):
     current_score = db.Column(db.Integer)
     guesses = db.Column(db.String)
     def __repr__(self):
-        return "Current score for {} (game #{}) is {}! Great job!".format(self.name, self.id, self.current_score)
+        return "Game #{} ({}): {}".format(self.id, self.player, self.current_score)
 
 ###################
 ###### FORMS ######
@@ -175,16 +178,16 @@ def play_game():
         ia = IMDb()
         top_250 = [str(item) for item in ia.get_top250_movies()]
         rank = None
+        already_guessed = False
         for i in range(0, 250):
             if game_form.guess.data == top_250[i]: rank = i + 1
         if rank and game_form.game_id.data:
-            print("old game")
-            increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data)
+            if not increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data):
+                already_guessed = True
         elif game_form.player.data:
-            print ("new game")
             game = create_game(player=game_form.player.data, correct=rank, guess=game_form.guess.data)
         db.session.commit()
-        return render_template('game_result.html', rank=rank)
+        return render_template('game_result.html', rank=rank, already_guessed=already_guessed)
     return render_template('game.html', form=game_form, game_choice=game_choice)
 
 @app.route('/scores')
