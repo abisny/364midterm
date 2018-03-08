@@ -35,28 +35,31 @@ db = SQLAlchemy(app)
 # MODIFIES: db tables movies, years
 # EFFECTS: adds release_year to Years if not there, adds movie to Movies if
 #          not there (with foreign key release_year)
-def get_or_create(title, release_year):
+def get_or_create_movie_year(title, release_year):
     if not Year.query.filter_by(name=release_year).first():
         db.session.add(Year(name=release_year))
-    if Movie.query.filter_by(title=title, release_year=release_year).first():
-        return Movie.query.filter_by(title=title, release_year=release_year).first()
-    movie = Movie(title=title, release_year=release_year)
-    db.session.add(movie)
-    db.session.commit()
-    return movie
+    if not Movie.query.filter_by(title=title, release_year=release_year).first():
+        db.session.add(Movie(title=title, release_year=release_year))
+        db.session.commit()
 
-def get_old_game(game_id):
+# REQUIRES: valid game_id, guess is a string
+# MODIFIES: row for given game_id in table games
+# EFFECTS: increments score for game at game_id by one and adds the guess to the
+#          "list" of guesses attached to game all if guess hasn't already been made
+def increment_score(game_id, guess):
     game = Game.query.filter_by(id=game_id).first()
-    game.current_score+=1
-    game.guesses += form.guess.data
-    return game
+    if guess not in game.guesses.split(';'):
+        game.current_score+=1
+        game.guesses += (';' + guess)
 
-def create_game(player, score, guess):
+# REQUIRES: player and guess are strings, correct either an integer or None
+# MODIFIES: db table games
+# EFFECTS: adds a new game to the db table games with given player name;
+#          increments score if correct guess
+def create_game(player, correct, guess):
     game = Game(player=player, current_score=0)
     db.session.add(game)
-    if index:
-        game.current_score+=1
-        game.guesses = guess
+    if correct: increment_score(game.id, guess)
     return game
 
 
@@ -121,7 +124,7 @@ class GameForm(FlaskForm):
 ###### VIEW FXNS ######
 #######################
 
-## Error handling routes
+## Error handling routes ##
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
@@ -129,7 +132,7 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'), 500
-########################
+###########################
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -153,8 +156,7 @@ def movies():
     if form.validate_on_submit():
         ia = IMDb()
         first_result = ia.search_movie(form.title.data)[0]
-        # get/create Year and associated Movie
-        get_or_create(title=first_result['title'], release_year=first_result['year'])
+        get_or_create_movie_year(title=first_result['title'], release_year=first_result['year'])
         return redirect(url_for('all_movies'))
     return render_template('movie_form.html', form=form)
 
@@ -167,22 +169,25 @@ def all_movies():
 def play_game():
     game_choice = 1
     if request.args: game_choice = int(request.args['game'])
-    form = GameForm()
-    if form.validate_on_submit():
+    game_form = GameForm()
+    if game_form.validate_on_submit():
         ia = IMDb()
         top_250 = [str(item) for item in ia.get_top250_movies()]
         index = None
         for i in range(0, 250):
-            if form.guess.data == top_250[i]: index = i + 1
-        if index and Game.query.filter_by(id=int(form.game_id.data)).first():
-            print ('old game')
-            game = get_old_game(game_id=int(form.game_id.data))
+            if game_form.guess.data == top_250[i]: index = i + 1
+        if index and game_choice == 2:
+            increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data)
         elif game_choice == 1:
-            print ('new game')
-            game = create_game(player=form.player.data, score=index, guess=form.guess.data)
+            game = create_game(player=game_form.player.data, correct=index, guess=game_form.guess.data)
         db.session.commit()
         return render_template('game_result.html', rank=index)
-    return render_template('game.html', form=form, game_choice=game_choice)
+    return render_template('game.html', form=game_form, game_choice=game_choice)
+
+@app.route('/scores')
+def view_scores():
+    games = Game.query.all()
+    return render_template('scores.html', games=games)
 
 ## Code to run the application...
 if __name__ == '__main__':
