@@ -1,0 +1,12 @@
+{% block content %}
+
+<form action="{{ url_for('movies') }}" method='GET'>
+  <i>{{ title }}</i> ({{ release_year }})<br>
+  <input type='radio' name='create' value=1> Add this movie to the database.<br>
+  <input type='radio' name='create' value=2> Try again.<br>
+  <input type='submit' onsubmit='return showResults()' value='Submit'><br>
+</form>
+
+{% endblock %}
+
+{% extends 'base.html' %}

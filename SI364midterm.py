@@ -8,7 +8,7 @@ import os
 from flask import Flask, render_template, session, redirect, url_for, flash, request
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, RadioField # Note that you may need to import more here! Check out examples that do what you want to figure out what.
-from wtforms.validators import Required # Here, too
+from wtforms.validators import Required, ValidationError # Here, too
 from flask_sqlalchemy import SQLAlchemy
 from imdb import IMDb # pip install imdbpy
 
@@ -73,9 +73,6 @@ class Name(db.Model):
     name = db.Column(db.String(64))
     def __repr__(self):
         return "{} (ID: {})".format(self.name, self.id)
-    def validate_name(self, field):
-        if len(str(field.data).split()) < 2:
-            raise ValidationError("Name must be at least two words")
 
 class Movie(db.Model):
     __tablename__ = "movies"
@@ -109,10 +106,18 @@ class Game(db.Model):
 class NameForm(FlaskForm):
     name = StringField("Please enter your full name.",validators=[Required()])
     submit = SubmitField()
+    def validate_name(self, field):
+        if len(str(field.data).split()) < 2:
+            raise ValidationError("Name must be at least two words")
 
 class MovieForm(FlaskForm):
-    title = StringField("Please enter the title of a movie.", validators=[Required()])
+    title = StringField("Search for a movie by title.", validators=[Required()])
     submit = SubmitField()
+    def validate_title(self, field):
+        ia = IMDb()
+        first_result = ia.search_movie(field.data)[0]
+        if first_result['title'] != field.data:
+            raise ValidationError("Title was not found in IMDb database. Check spelling and try again.")
 
 class GameForm(FlaskForm):
     game_id = StringField("Enter the ID number for the game you want to continue.")
@@ -172,15 +177,17 @@ def play_game():
     if game_form.validate_on_submit():
         ia = IMDb()
         top_250 = [str(item) for item in ia.get_top250_movies()]
-        index = None
+        rank = None
         for i in range(0, 250):
-            if game_form.guess.data == top_250[i]: index = i + 1
-        if index and game_choice == 2:
+            if game_form.guess.data == top_250[i]: rank = i + 1
+        if rank and game_form.game_id.data:
+            print("old game")
             increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data)
-        elif game_choice == 1:
-            game = create_game(player=game_form.player.data, correct=index, guess=game_form.guess.data)
+        elif game_form.player.data:
+            print ("new game")
+            game = create_game(player=game_form.player.data, correct=rank, guess=game_form.guess.data)
         db.session.commit()
-        return render_template('game_result.html', rank=index)
+        return render_template('game_result.html', rank=rank)
     return render_template('game.html', form=game_form, game_choice=game_choice)
 
 @app.route('/scores')
