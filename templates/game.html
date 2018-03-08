@@ -3,16 +3,21 @@
 <h4>Play the game!</h4>
 <p>Enter a movie title you think would be in IMDb's top 250 and see if you can guess all of them...</p>
 
+<form action="{{ url_for('play_game') }}" method='GET'>
+  <input type='radio' name='game' value=1> Start a new game.<br>
+  <input type='radio' name='game' value=2> Continue previous game.<br>
+  <input type='submit' onsubmit='return showResults()' value='Submit'><br>
+</form>
+
 <form action="{{ url_for('play_game') }}" method='POST'>
-  {{ form.game.label() }}{{ form.game() }}
-  {% if form.game == 1 %}
-    {{ form.player.label() }}{{ form.player() }}
+  {% if game_choice == 1 %}
+    {{ form.player.label() }}{{ form.player() }}<br>
   {% endif %}
-  {% if form.game == 2 %}
-    {{ form.game_id.label() }}{{ form.game_id() }}
+  {% if game_choice == 2 %}
+    {{ form.game_id.label() }}{{ form.game_id() }}<br>
   {% endif %}
 
-  {{ form.movie.label() }}{{ form.movie() }}
+  {{ form.guess.label() }}{{ form.guess() }}
   {{ form.submit() }}
   {{ form.hidden_tag() }}
 </form>

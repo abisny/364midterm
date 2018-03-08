@@ -45,6 +45,20 @@ def get_or_create(title, release_year):
     db.session.commit()
     return movie
 
+def get_old_game(game_id):
+    game = Game.query.filter_by(id=game_id).first()
+    game.current_score+=1
+    game.guesses += form.guess.data
+    return game
+
+def create_game(player, score, guess):
+    game = Game(player=player, current_score=0)
+    db.session.add(game)
+    if index:
+        game.current_score+=1
+        game.guesses = guess
+    return game
+
 
 ##################
 ##### MODELS #####
@@ -80,7 +94,8 @@ class Game(db.Model):
     __tablename__ = "games"
     id = db.Column(db.Integer, primary_key=True)
     player = db.Column(db.String(64))
-    current_score = db.Column(db.String(64))
+    current_score = db.Column(db.Integer)
+    guesses = db.Column(db.String)
     def __repr__(self):
         return "Current score for {} (game #{}) is {}! Great job!".format(self.name, self.id, self.current_score)
 
@@ -97,10 +112,9 @@ class MovieForm(FlaskForm):
     submit = SubmitField()
 
 class GameForm(FlaskForm):
-    game = RadioField(choices=[(1, "Start a new game."), (2, "Continue previous game.")], validators=[Required()])
     game_id = StringField("Enter the ID number for the game you want to continue.")
     player = StringField("Enter your name.")
-    movie = StringField("Guess a top 250 movie title here.", validators=[Required()])
+    guess = StringField("Guess a top 250 movie title here.", validators=[Required()])
     submit = SubmitField()
 
 #######################
@@ -151,19 +165,24 @@ def all_movies():
 
 @app.route('/play_game', methods=['GET', 'POST'])
 def play_game():
+    game_choice = 1
+    if request.args: game_choice = int(request.args['game'])
     form = GameForm()
     if form.validate_on_submit():
         ia = IMDb()
-        top_250_raw = ia.get_top250_movies()
-        top_250 = []
-        for item in top_250_raw:
-            top_250.append(str(item))
+        top_250 = [str(item) for item in ia.get_top250_movies()]
         index = None
         for i in range(0, 250):
-            if form.movie.data == top_250[i]:
-                index = i + 1
+            if form.guess.data == top_250[i]: index = i + 1
+        if index and Game.query.filter_by(id=int(form.game_id.data)).first():
+            print ('old game')
+            game = get_old_game(game_id=int(form.game_id.data))
+        elif game_choice == 1:
+            print ('new game')
+            game = create_game(player=form.player.data, score=index, guess=form.guess.data)
+        db.session.commit()
         return render_template('game_result.html', rank=index)
-    return render_template('game.html', form=form)
+    return render_template('game.html', form=form, game_choice=game_choice)
 
 ## Code to run the application...
 if __name__ == '__main__':

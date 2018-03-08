@@ -1,0 +1,10 @@
+{% block content %}
+
+<h2>SCORES</h2>
+{% for game in games %}
+  <li>Game #{{ game.id }}: {{ game.current_score }}</li>
+{% endfor %}
+
+<br><a href='/play_game'>PlAY AGAIN</a>
+
+{% endblock %}
