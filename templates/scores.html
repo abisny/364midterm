@@ -10,10 +10,13 @@
 <hr>
 <h3>All Games</h3>
 <p>Select a 'more info' button to see current guesses</p>
+{% for game in games %}
+  <li>{{ game }}</li>
+{% endfor %}
+
 <form action="{{ url_for('display_game') }}" method='GET'>
-  {% for game in games %}
-    <li>{{ game }} (<input type='radio' name='info' value=game.id>More Info.)</li>
-  {% endfor %}
+  Enter ID for the game to view more info.
+  <input type='text' name='game_id'><br>
   <input type='submit' value='Submit'><br>
 </form>
 

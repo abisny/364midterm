@@ -205,9 +205,9 @@ def view_scores():
 
 @app.route('/display_game')
 def display_game():
-    game_id = str(request.args['info'])
+    game_id = str(request.args['game_id'])
     game = Game.query.filter_by(id=game_id).first()
-    guesses = [str(guess) for guess in game.guesses.split(';')]
+    guesses = [str(guess) for guess in game.guesses.split(';')][1:]
     return render_template('game_info.html', game=game, guesses=guesses, to_go=250-len(guesses))
 
 ## Code to run the application...
