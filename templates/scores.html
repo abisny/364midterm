@@ -1,13 +1,23 @@
 {% block content %}
 
-<div align='center'><h3>High Scores</h3></div>
+<h3>High Scores</h3>
 <ol>
-  {% for game in games %}
+  {% for game in sorted_games %}
     <li>{{ game }}</li>
   {% endfor %}
 </ol>
 
-<br><a href='/play_game'>PlAY AGAIN</a>
+<hr>
+<h3>All Games</h3>
+<p>Select a 'more info' button to see current guesses</p>
+<form action="{{ url_for('display_game') }}" method='GET'>
+  {% for game in games %}
+    <li>{{ game }} (<input type='radio' name='info' value=game.id>More Info.)</li>
+  {% endfor %}
+  <input type='submit' value='Submit'><br>
+</form>
+
+<br>Play again <a href='/play_game'>here</a>!!
 
 {% endblock %}
 

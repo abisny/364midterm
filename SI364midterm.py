@@ -45,7 +45,7 @@ def get_or_create_movie_year(title, release_year):
 # REQUIRES: valid game_id, guess is a string
 # MODIFIES: row for given game_id in table games
 # EFFECTS: increments score for game at game_id by one and adds the guess to the
-#          "list" of guesses attached to game all if guess hasn't already been made
+#          "list" of guesses attached to game (all if guess hasn't already been made)
 def increment_score(game_id, guess):
     game = Game.query.filter_by(id=game_id).first()
     if guess not in game.guesses.split(';'):
@@ -163,6 +163,7 @@ def movies():
         first_result = ia.search_movie(form.title.data)[0]
         get_or_create_movie_year(title=first_result['title'], release_year=first_result['year'])
         return redirect(url_for('all_movies'))
+    else: flash(form.errors)
     return render_template('movie_form.html', form=form)
 
 @app.route('/all_movies')
@@ -175,24 +176,39 @@ def play_game():
     if request.args: game_choice = int(request.args['game'])
     game_form = GameForm()
     if game_form.validate_on_submit():
+        # Setup
         ia = IMDb()
         top_250 = [str(item) for item in ia.get_top250_movies()]
         rank = None
         already_guessed = False
+        # check if guess was correct (stored in rank)
         for i in range(0, 250):
             if game_form.guess.data == top_250[i]: rank = i + 1
-        if rank and game_form.game_id.data:
-            if not increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data):
-                already_guessed = True
-        elif game_form.player.data:
+        # update game_choice and create game/increment score where appropriate
+        if game_form.game_id.data: game_choice = 2
+        if game_choice == 1:
             game = create_game(player=game_form.player.data, correct=rank, guess=game_form.guess.data)
+        elif rank and not increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data):
+            already_guessed = True
         db.session.commit()
         return render_template('game_result.html', rank=rank, already_guessed=already_guessed)
+    else: flash(game_form.errors)
     return render_template('game.html', form=game_form, game_choice=game_choice)
 
 @app.route('/scores')
 def view_scores():
-    return render_template('scores.html', games=Game.query.all())
+    games = Game.query.all()
+    def current_score(game):
+        return game.current_score
+    sorted_games = sorted(Game.query.all(), key=current_score, reverse=True)
+    return render_template('scores.html', games=games, sorted_games=sorted_games)
+
+@app.route('/display_game')
+def display_game():
+    game_id = str(request.args['info'])
+    game = Game.query.filter_by(id=game_id).first()
+    guesses = [str(guess) for guess in game.guesses.split(';')]
+    return render_template('game_info.html', game=game, guesses=guesses, to_go=250-len(guesses))
 
 ## Code to run the application...
 if __name__ == '__main__':
