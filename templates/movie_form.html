@@ -6,6 +6,14 @@
   {{ form.title.label() }}{{ form.title() }}
   {{ form.submit() }}
   {{ form.hidden_tag() }}
+  
+  {% if get_flashed_messages() %}
+    <ul>
+    {% for message in get_flashed_messages() %}
+      <div style="color:#FF0000"><b>{{ message }}</b></div>
+    {% endfor %}
+    </ul>
+  {% endif %}
 </form>
 
 {% endblock %}

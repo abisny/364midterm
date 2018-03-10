@@ -162,10 +162,13 @@ def movies():
     form = MovieForm()
     if form.validate_on_submit():
         ia = IMDb()
-        first_result = ia.search_movie(form.title.data)[0]
+        first_result = ia.get_keyword(form.title.data, results=1)
+        print(first_result)
+        #first_result = ia.search_movie(form.title.data)[0]
         get_or_create_movie_year(title=first_result['title'], release_year=first_result['year'])
         return redirect(url_for('all_movies'))
-    else: flash(form.errors)
+    elif 'title' in form.errors:
+        flash(form.errors['title'][0])
     return render_template('movie_form.html', form=form)
 
 @app.route('/all_movies')
@@ -195,7 +198,6 @@ def play_game():
         elif increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data) == 3: return render_template('no_game.html')
         db.session.commit()
         return render_template('game_result.html', rank=rank, already_guessed=already_guessed)
-    else: flash(game_form.errors)
     return render_template('game.html', form=game_form, game_choice=game_choice)
 
 @app.route('/scores')
