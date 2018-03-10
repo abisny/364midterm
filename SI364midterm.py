@@ -48,11 +48,12 @@ def get_or_create_movie_year(title, release_year):
 #          "list" of guesses attached to game (all if guess hasn't already been made)
 def increment_score(game_id, guess):
     game = Game.query.filter_by(id=game_id).first()
+    if not game: return 3
     if guess not in game.guesses.split(';'):
         game.current_score+=1
         game.guesses += (';' + guess)
-        return True
-    return False
+        return 1
+    return 2
 
 # REQUIRES: player and guess are strings, correct either an integer or None
 # MODIFIES: db table games
@@ -115,8 +116,9 @@ class MovieForm(FlaskForm):
     submit = SubmitField()
     def validate_title(self, field):
         ia = IMDb()
-        first_result = ia.search_movie(field.data)[0]
-        if first_result['title'] != field.data:
+        try: first_result = ia.search_movie(field.data)[0]
+        except: first_result =''
+        if not first_result or first_result['title'] != field.data:
             raise ValidationError("Title was not found in IMDb database. Check spelling and try again.")
 
 class GameForm(FlaskForm):
@@ -168,7 +170,7 @@ def movies():
 
 @app.route('/all_movies')
 def all_movies():
-    return render_template('all_movies.html', movies=Movie.query.all())
+    return render_template('all_movies.html', movies=Movie.query.all(), years=Year.query.all())
 
 @app.route('/play_game', methods=['GET', 'POST'])
 def play_game():
@@ -188,8 +190,9 @@ def play_game():
         if game_form.game_id.data: game_choice = 2
         if game_choice == 1:
             game = create_game(player=game_form.player.data, correct=rank, guess=game_form.guess.data)
-        elif rank and not increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data):
+        elif rank and increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data) == 2:
             already_guessed = True
+        elif increment_score(game_id=int(game_form.game_id.data), guess=game_form.guess.data) == 3: return render_template('no_game.html')
         db.session.commit()
         return render_template('game_result.html', rank=rank, already_guessed=already_guessed)
     else: flash(game_form.errors)

@@ -4,6 +4,15 @@
   <li><i>{{ movie.title }}</i> ({{ movie.release_year }})</li>
 {% endfor %}
 
+{% if movies %}<h3>Movies sorted by year</h3>{% endif %}
+{% for year in years %}
+  {{ year.name }}:
+  {% for movie in year.movies %}
+    <i>{{ movie.title }}, </i>
+  {% endfor %}
+  <br>
+{% endfor %}
+
 {% endblock %}
 
 {% extends 'base.html' %}
