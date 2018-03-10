@@ -107,3 +107,11 @@ Design will not earn you points for this assignment though you may certainly inc
 * Submit the *link* to your GitHub repository to the **SI 364 Midterm** assignment on our Canvas site. The link should be of the form: `https://github.com/YOURGITHUBUSERNAME/364midterm` (if it doesn't look like that, you are probably linking to something specific *inside* the repo, so make sure it does look like that).
 
 All set!
+
+/ --> base.html
+/all_names --> name_example.html
+/movies --> movie_form.html
+/all_movies --> all_movies.html
+/play_game --> game.html **and** game_result.html
+/scores --> scores.html
+/display_game --> game_info.html
