@@ -203,7 +203,7 @@ def view_scores():
     games = Game.query.all()
     def current_score(game):
         return game.current_score
-    sorted_games = sorted(Game.query.all(), key=current_score, reverse=True)
+    sorted_games = sorted(Game.query.all(), key=current_score, reverse=True)[:10]
     return render_template('scores.html', games=games, sorted_games=sorted_games)
 
 @app.route('/display_game')
