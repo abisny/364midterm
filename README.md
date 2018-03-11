@@ -54,12 +54,12 @@
 * /display_game --> game_info.html
 
 ## View Function Documentation
-* home()- creates an instance of the name form
-* all_names()- queries from names and sends data to template
-* page_not_found()- renders template for 404 errors
-* internal_server_error()- renders template for 500 errors
-* movies()- creates an instance of the movie form and searches IMDb for the title entered. adds the movie and its corresponding year to the database if it isn't already there
-* all_movies()- queries from movies and years and sends data to template
-* play_game()- carries out function for playing IMDb guessing game. creates game form and checks if the guess is in IMDb's top 250-- carries out appropriate actions based on the player's guess and whether they want to create a new game or continue with an old one
-* view_scores()- queries game data and prints all games in a list, and then top 10 games and their scores. allows the user to enter the id of a game to see more info about that game, including which movies have thus far been thus far been guessed
-* display_game()- queries game based on which game id the user enters in the scores.html template rendered in view_scores(). sends the game_info.html template the game and its guesses to be displayed
+* ```home()```- creates an instance of the name form
+* ```all_names()```- queries from names and sends data to template
+* ```page_not_found()```- renders template for 404 errors
+* ```internal_server_error()```- renders template for 500 errors
+* ```movies()```- creates an instance of the movie form and searches IMDb for the title entered. adds the movie and its corresponding year to the database if it isn't already there
+* ```all_movies()```- queries from movies and years and sends data to template
+* ```play_game()```- carries out function for playing IMDb guessing game. creates game form and checks if the guess is in IMDb's top 250-- carries out appropriate actions based on the player's guess and whether they want to create a new game or continue with an old one
+* ```view_scores()```- queries game data and prints all games in a list, and then top 10 games and their scores. allows the user to enter the id of a game to see more info about that game, including which movies have thus far been thus far been guessed
+* ```display_game()```- queries game based on which game id the user enters in the scores.html template rendered in view_scores(). sends the game_info.html template the game and its guesses to be displayed
