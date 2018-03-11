@@ -10,6 +10,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, RadioField # Note that you may need to import more here! Check out examples that do what you want to figure out what.
 from wtforms.validators import Required, ValidationError # Here, too
 from flask_sqlalchemy import SQLAlchemy
+from bs4 import BeautifulSoup
+import requests, re
 from imdb import IMDb # pip install imdbpy
 
 ## App setup code
@@ -116,9 +118,11 @@ class MovieForm(FlaskForm):
     submit = SubmitField()
     def validate_title(self, field):
         ia = IMDb()
-        try: first_result = ia.search_movie(field.data)[0]
-        except: first_result =''
-        if not first_result or first_result['title'] != field.data:
+        r = requests.get('http://www.imdb.com/find?q=' + field.data + '&s=all')
+        soup = BeautifulSoup(r.content, 'html.parser')
+        results = soup.find_all('td',{'class':'result_text'})
+        titles = [item.a.contents[0] for item in results]
+        if titles[0] != field.data:
             raise ValidationError("Title was not found in IMDb database. Check spelling and try again.")
 
 class GameForm(FlaskForm):
@@ -162,13 +166,15 @@ def movies():
     form = MovieForm()
     if form.validate_on_submit():
         ia = IMDb()
-        first_result = ia.get_keyword(form.title.data, results=1)
-        print(first_result)
-        #first_result = ia.search_movie(form.title.data)[0]
-        get_or_create_movie_year(title=first_result['title'], release_year=first_result['year'])
+        r = requests.get('http://www.imdb.com/find?q=' + form.title.data + '&s=all')
+        soup = BeautifulSoup(r.content, 'html.parser')
+        results = soup.find_all('td',{'class':'result_text'})
+        regex = [re.search('[0-9]+', result.contents[2]) for result in results[:1]][0]
+        for result in results[:1]: year = int(result.contents[2][regex.span()[0]:regex.span()[1]])
+        titles = [item.a.contents[0] for item in results]
+        get_or_create_movie_year(title=titles[0], release_year=year)
         return redirect(url_for('all_movies'))
-    elif 'title' in form.errors:
-        flash(form.errors['title'][0])
+    elif 'title' in form.errors: flash(form.errors['title'][0])
     return render_template('movie_form.html', form=form)
 
 @app.route('/all_movies')
