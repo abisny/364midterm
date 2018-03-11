@@ -40,6 +40,9 @@
 
 * **(100 points) Write code in your Python file that will allow a user to submit duplicate data to a form, but will *not* save duplicate data (like the same user should not be able to submit the exact same tweet text for HW3).**
 
+## Instructions to run code
+* run the command ```pip install imdbpy``` in the command line before running!
+
 
 ## Routes in this app
 * / --> base.html
